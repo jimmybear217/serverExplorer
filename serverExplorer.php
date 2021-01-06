@@ -1,4 +1,4 @@
-<?php // see https://github.com/jimmybear217/server_explorer
+<?php // see https://github.com/jimmybear217/serverExplorer
 
     // application settings
     $settings = array(
