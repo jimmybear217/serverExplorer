@@ -25,6 +25,11 @@
             "2FA" => array(
                 "enabled" => false,
                 "server" => "https://jimmybear217.dev/projects/repo/server_explorer/2fa.php"
+            ),
+            "DemoMode" => array(
+                "enabled" => true,
+                "username" => "",
+                "password" => "SuperSecurePassword"
             )
         )
     );
@@ -59,13 +64,13 @@
                         . (($settings["explorer"]["use_remote_assets"]) ? $remote_assets["favicon"]["actual"] : $remote_assets["favicon"]["backup"])
                         . '">' . (($settings["explorer"]["use_remote_assets"]) ? '<link rel="stylesheet" src="' . $remote_assets["stylesheet"] . '">' : '')
                         . '</head><body><header><h1>' . (($settings["explorer"]["use_remote_assets"]) ? '<img src="' . $remote_assets["logo"] . '" height="32" width="32"> ' : '') . 'Server Explorer</h1></header>'
-                        . '<div id="output">',
-        "input"         => '</div><div id="input"><form action="' . $_SERVER["PHP_SELF"] . '?action=submit" method="POST">'
+                        . '<div id="output"><pre>',
+        "input"         => '</pre></div><div id="input"><form action="' . $_SERVER["PHP_SELF"] . '?action=submit" method="POST">'
                         . '<input name="command" type="text" placeholder="$>"><input type="submit" value="send (or press enter)">'
                         . '</form>',
-        "login"         => '<div id="login"><form action="' . $_SERVER["PHP_SELF"] . '?action=login" method="POST">'
-                        . (($settings["auth"]["user_password"]["enabled"]) ? '<input name="username" placeholder="username" type="text">' : "")
-                        . (($settings["auth"]["user_password"]["enabled"] || $settings["auth"]["app_password"]["enabled"]) ? '<input name="password" placeholder="password" type="password">' : "")
+        "login"         => 'Please log in</pre><div id="login"><form action="' . $_SERVER["PHP_SELF"] . '?action=login" method="POST">'
+                        . (($settings["auth"]["user_password"]["enabled"]) ? '<input name="username" placeholder="username" type="text" autocomplete="username" value="' . (($settings["auth"]["DemoMode"]["enabled"]) ? $settings["auth"]["DemoMode"]["username"] : "") . '">' : "")
+                        . (($settings["auth"]["user_password"]["enabled"] || $settings["auth"]["app_password"]["enabled"]) ? '<input name="password" placeholder="password" type="password" autocomplete="username" value="' . (($settings["auth"]["DemoMode"]["enabled"]) ? $settings["auth"]["DemoMode"]["password"] : "") . '">' : "")
                         . '<input value="login (or press enter)" type="submit">',
         "footer"        => '</body></html>'
     );
@@ -170,9 +175,11 @@
     // write header
     echo $pages["header"];
     
-    
+
     // interpret commands
-    
+    if (isset($_GET["action"]) && $_GET["action"] == "submit" && !empty($_POST["input"])) {
+        echo "Command: " . $_POST["input"];
+    }
     
     
     // write footer
