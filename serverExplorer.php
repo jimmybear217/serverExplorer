@@ -180,18 +180,23 @@
         "db" => "interact with a MySQL database. Type `db help` for a list of commands you can use with db.",
     );
 
-    function command_help($argv=array()) {
-        global $commandList;
+    function command_welcome($argv=array()) {
         echo '<p>Welcome to Server Explorer.<br>This tool will let you explore this server in several ways and as discretely'
             . ' as possible. Don\'t forget that unless you have been allowed to use this system (like in Jimmy\'s Demo) or'
             . ' in your own setup, your actions may be subject to legal consequences as you would be accessing someone else'
-            . '\'s system without their consent. So, any action of yours, is your own responsability. Happy Exploring :)</p>'
-            . '<h3>Available Commands:</h3><table>';
+            . '\'s system without their consent. So, any action of yours, is your own responsability. Happy Exploring :)</p>';
+        command_help();
+        echo '<p>If you have any questions, problem or suggestion, free to contact me at <a href="mailto:serverExplorer@jimmybear217.dev">serverExplorer@jimmybear217.dev</a>'
+            . 'or to raise an issue on <a href="https://github.com/jimmybear217/serverExplorer" target="_blank">GitHub.com/jimmybear217/serverExplorer</a>. Thank you.</p>';
+    }
+
+    function command_help($argv=array()) {
+        global $commandList;
+        echo '<h3>Available Commands:</h3><table>';
         foreach(array_keys($commandList) as $command) {
             echo '<tr><th>' . $command . '<th></td>' . $commandList[$command] . '</td></tr>';
         }
-        echo '</table><p>If you have any questions, problem or suggestion, free to contact me at <a href="mailto:serverExplorer@jimmybear217.dev">serverExplorer@jimmybear217.dev</a>'
-            . 'or to raise an issue on <a href="https://github.com/jimmybear217/serverExplorer" target="_blank">GitHub.com/jimmybear217/serverExplorer</a>. Thank you.</p>';
+        echo '</table>';
     }
 
     function command_phpinfo($argv=array()) {
@@ -208,18 +213,20 @@
 
     // interpret commands
     if (isset($_GET["action"]) && $_GET["action"] == "submit" && !empty($_POST["command"])) {
-        $command = explode($_POST["command"]);
-        echo "Command: " . implode(" ", $command);
+        $command = explode(' ', $_POST["command"]);
+        echo "$> " . implode(" ", $command);
         if (in_array($command[0], array_keys($commandList))) {
-            $comm = "command_" . array_shift($command);
+            $comm = array_shift($command);
             $argv = $command;
             call_user_func_array("command_" . $comm, $argv);
         } else {
+            // unknown input
+            echo "<p>I'm sorry, this command is not valid.</p>";
             command_help();
         }
     } else {
-        // show help command
-        command_help();
+        // show welcome command
+        command_welcome();
     }
     
     
