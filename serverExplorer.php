@@ -203,7 +203,7 @@
         global $commandList;
         echo '<h3>Available Commands:</h3><table>';
         foreach(array_keys($commandList) as $command) {
-            echo '<tr><th>' . $command . '</th></td>' . $commandList[$command] . '</td></tr>';
+            echo '<tr><th><a href="' . $_SERVER["PHP_SELF"] . '?action=submit&command=' . $command . '">' . $command . '</a></th><td>' . $commandList[$command] . '</td></tr>';
         }
         echo '</table>';
     }
@@ -237,7 +237,7 @@
         global $commandListFS;
         echo '<h3>Available <b>F</b>ile<b>S</b>ystem commands</h3><table>';
         foreach(array_keys($commandListFS) as $command) {
-            echo '<tr><th>' . $command . '</th></td>' . $commandListFS[$command] . '</td></tr>';
+            echo '<tr><th><a href="' . $_SERVER['PHP_SELF'] . '?action=submit&command=fs%20' . $command . '">' . $command . '</th><td>' . $commandListFS[$command] . '</td></tr>';
         }
         echo '</table>';
     }
