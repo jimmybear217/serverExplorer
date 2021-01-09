@@ -184,9 +184,9 @@
         'help' => 'show this help message',
         'ls' => 'lists the content of the specifed directory. defaults to the current directory.',
         'open' => 'opens the specified file',
-        'rm' => 'deletes the specified file if possible',
+        /*'rm' => 'deletes the specified file if possible',
         'touch' => 'creates an empty file where specified',
-        'download' => 'download the specified address to the disk at the specified location'
+        'download' => 'download the specified address to the disk at the specified location'*/
     );
 
     function command_welcome($argv=array()) {
