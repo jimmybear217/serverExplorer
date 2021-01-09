@@ -180,6 +180,14 @@
         "fs" => "interact with the File System. Type `fs help` for a list of commands you can use with fs.",
         "db" => "interact with a MySQL database. Type `db help` for a list of commands you can use with db.",
     );
+    $commandListFS = array(
+        'help' => 'show this help message',
+        'ls' => 'lists the content of the specifed directory. defaults to the current directory.',
+        'open' => 'opens the specified file',
+        'rm' => 'deletes the specified file if possible',
+        'touch' => 'creates an empty file where specified',
+        'download' => 'download the specified address to the disk at the specified location'
+    );
 
     function command_welcome($argv=array()) {
         echo '<p>Welcome to Server Explorer.<br>This tool will let you explore this server in several ways and as discretely'
@@ -195,7 +203,7 @@
         global $commandList;
         echo '<h3>Available Commands:</h3><table>';
         foreach(array_keys($commandList) as $command) {
-            echo '<tr><th>' . $command . '<th></td>' . $commandList[$command] . '</td></tr>';
+            echo '<tr><th>' . $command . '</th></td>' . $commandList[$command] . '</td></tr>';
         }
         echo '</table>';
     }
@@ -206,6 +214,32 @@
         } else {
             phpinfo();
         }
+    }
+
+    function command_fs($argv=array("ls", ".")) {
+        // set fs command list
+        global $commandListFS;
+        // read first argument
+        $comm = array_shift($argv);
+        if (in_array($comm, array_keys($commandListFS))) {
+            if (function_exists("command_fs_" . $comm)) {
+                call_user_func_array("command_fs_" . $comm, array($argv));
+            } else {
+                echo "<p>Unable to run this <b>F</b>ile<b>S</b>ystem command</p>";
+            }
+        } else {
+            echo '<p>Unknown <b>F</b>ile<b>S</b>ystem command</p>';
+            command_fs_help($argv);
+        }
+    }
+
+    function command_fs_help($argv=array()) {
+        global $commandListFS;
+        echo '<h3>Available <b>F</b>ile<b>S</b>ystem commands</h3><table>';
+        foreach(array_keys($commandListFS) as $command) {
+            echo '<tr><th>' . $command . '</th></td>' . $commandListFS[$command] . '</td></tr>';
+        }
+        echo '</table>';
     }
 
     // write header
@@ -220,7 +254,7 @@
             $comm = array_shift($command);
             $argv = $command;
             if (function_exists("command_" . $comm)) {
-                call_user_func_array("command_" . $comm, $argv);
+                call_user_func_array("command_" . $comm, array($argv));
             } else {
                 echo "<p>Unable to run this command</p>";
             }
