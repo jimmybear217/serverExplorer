@@ -263,8 +263,11 @@
     function command_fs_ls($argv=array(".")) {
         if (empty($argv)) $argv = array(__DIR__);
         $path = realpath($argv[0]);
-        var_dump($path);
-        var_dump($argv);
+        if ($path == false) {
+            $path = realpath(".");
+            echo '<p class="error">the path could not be found: <span class="path">' . $argv[0] . '</span><br>'
+                . 'reverting to current directory: <span class="path">' . $path . '</span></p>';
+        }
         echo '<h3>Contents of <span class="path">' . $path . '</span></h3>';
         if (isFunctionAvailable("scandir")) {
             echo '<table>';
@@ -282,7 +285,6 @@
         } else {
             echo '<p class="error">This function is not available on this server</p>';
         }
-        
     }
 
     // write header
