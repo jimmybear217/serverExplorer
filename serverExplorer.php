@@ -218,7 +218,11 @@
         if (in_array($command[0], array_keys($commandList))) {
             $comm = array_shift($command);
             $argv = $command;
-            call_user_func_array("command_" . $comm, $argv);
+            if (function_exists("command_" . $comm)) {
+                call_user_func_array("command_" . $comm, $argv);
+            } else {
+                echo "<p>Unable to run this command</p>";
+            }
         } else {
             // unknown input
             echo "<p>I'm sorry, this command is not valid.</p>";
