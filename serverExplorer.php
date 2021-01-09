@@ -128,7 +128,7 @@
                 if (!empty($_POST["password"])) {
                     if (password_verify($_POST["password"], $settings["auth"]["app_password"]["hash"])) {
                         $token = password_hash("app" . date("Y", time()) . $_SERVER["SCRIPT_FILENAME"], PASSWORD_DEFAULT);
-                        setcookie("auth_user", $token, time()+(60*60), $_SERVER["PHP_SELF"]);
+                        setcookie("auth_app", $token, time()+(60*60), $_SERVER["PHP_SELF"]);
                         $login_state = true;
                     }
                 }
