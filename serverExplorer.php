@@ -65,10 +65,11 @@
                         . '">' . (($settings["explorer"]["use_remote_assets"]) ? '<link rel="stylesheet" src="' . $remote_assets["stylesheet"] . '">' : '')
                         . '</head><body><header><h1>' . (($settings["explorer"]["use_remote_assets"]) ? '<img src="' . $remote_assets["logo"] . '" height="32" width="32"> ' : '') . 'Server Explorer</h1></header>'
                         . '<div id="output">',
-        "input"         => '</div><div id="input"><form action="' . $_SERVER["PHP_SELF"] . '?action=submit" method="POST">'
-                        . '<input name="command" type="text" placeholder="$>" value="' . (isset($_POST['command']) ? $_POST['command'] : "") . '"><input type="submit" value="send (or press enter)">'
+        "input"         => '</div><div id="input"><form action="' . $_SERVER["PHP_SELF"] . '" method="GET">'
+                        . '<input type="hidden" name="action" value="submit">'
+                        . '<input name="command" type="text" placeholder="$>" value="' . (isset($_GET['command']) ? $_GET['command'] : "") . '"><input type="submit" value="send (or press enter)">'
                         . '</form>',
-        "login"         => '</h3>Please log in</h3><div id="login"><form action="' . $_SERVER["PHP_SELF"] . '?action=login" method="POST">'
+        "login"         => '</h3>Please log in</h3><div id="login"><form action="' . $_SERVER["PHP_SELF"] . '?action=login" method="GET">'
                         . (($settings["auth"]["user_password"]["enabled"]) ? '<input name="username" placeholder="username" type="text" autocomplete="username" value="' . (($settings["auth"]["DemoMode"]["enabled"]) ? $settings["auth"]["DemoMode"]["username"] : "") . '">' : "")
                         . (($settings["auth"]["user_password"]["enabled"] || $settings["auth"]["app_password"]["enabled"]) ? '<input name="password" placeholder="password" type="password" autocomplete="username" value="' . (($settings["auth"]["DemoMode"]["enabled"]) ? $settings["auth"]["DemoMode"]["password"] : "") . '">' : "")
                         . '<input value="login (or press enter)" type="submit">',
@@ -212,8 +213,8 @@
     
 
     // interpret commands
-    if (isset($_GET["action"]) && $_GET["action"] == "submit" && !empty($_POST["command"])) {
-        $command = explode(' ', $_POST["command"]);
+    if (isset($_GET["action"]) && $_GET["action"] == "submit" && !empty($_GET["command"])) {
+        $command = explode(' ', $_GET["command"]);
         echo "$> " . implode(" ", $command);
         if (in_array($command[0], array_keys($commandList))) {
             $comm = array_shift($command);
