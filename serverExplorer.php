@@ -232,17 +232,21 @@
         // set fs command list
         global $commandListFS;
         // read first argument
-        $comm = array_shift($argv);
-        if (empty($argv)) $argv = array(".");
-        if (in_array($comm, array_keys($commandListFS))) {
-            if (function_exists("command_fs_" . $comm)) {
-                call_user_func_array("command_fs_" . $comm, array($argv));
-            } else {
-                echo '<p class="error">Unable to run this <b>F</b>ile<b>S</b>ystem command</p>';
-            }
-        } else {
-            echo '<p class="error">Unknown <b>F</b>ile<b>S</b>ystem command</p>';
+        if (empty($argv)) {
             command_fs_help($argv);
+        } else {
+            $comm = array_shift($argv);
+            if (empty($argv)) $argv = array(".");
+            if (in_array($comm, array_keys($commandListFS))) {
+                if (function_exists("command_fs_" . $comm)) {
+                    call_user_func_array("command_fs_" . $comm, array($argv));
+                } else {
+                    echo '<p class="error">Unable to run this <b>F</b>ile<b>S</b>ystem command</p>';
+                }
+            } else {
+                echo '<p class="error">Unknown <b>F</b>ile<b>S</b>ystem command</p>';
+                command_fs_help($argv);
+            }
         }
     }
 
@@ -257,7 +261,10 @@
     }
 
     function command_fs_ls($argv=array(".")) {
+        if (empty($argv)) $argv = array(__DIR__);
         $path = realpath($argv[0]);
+        var_dump($path);
+        var_dump($argv);
         echo '<h3>Contents of <span class="path">' . $path . '</span></h3>';
         if (isFunctionAvailable("scandir")) {
             echo '<table>';
@@ -265,9 +272,9 @@
                 echo '<tr>';
                 $realFile = realpath($path . "/" . $file);
                 if (is_dir($realFile)) {
-                    echo '<td><a href="' . $_SERVER["PHP_SELF"] . '?action=submit&command=fs%20ls%20' . urlencode('"' . $realFile . '"') . '">' . $file . '</a></td>';
+                    echo '<td><a href="' . $_SERVER["PHP_SELF"] . '?action=submit&command=fs ls ' . urlencode("'" . $realFile . "'") . '">' . $file . '</a></td>';
                 } else {
-                    echo '<td><a href="' . $_SERVER["PHP_SELF"] . '?action=submit&command=fs%20open%20' . urlencode('"' . $realFile . '"') . '">' . $file . '</a></td>';
+                    echo '<td><a href="' . $_SERVER["PHP_SELF"] . '?action=submit&command=fs open ' . urlencode("'" . $realFile . "'") . '">' . $file . '</a></td>';
                 }
                 echo '</tr>';
             }
@@ -284,8 +291,30 @@
 
     // interpret commands
     if (isset($_GET["action"]) && $_GET["action"] == "submit" && !empty($_GET["command"])) {
-        $command = explode(' ', $_GET["command"]);
-        echo '<p class="command">$&gt; ' . implode(" ", $command) . '</p>';
+        $commandArr = explode(' ', $_GET["command"]);
+        $command = array();
+        $commandArr_flag_quote = false;
+        $commandArr_validQuotes = array("'", urlencode("'"), '"', urlencode('"'), "`", urlencode("`"));
+        // read command including quotes
+        echo '<p class="command">$&gt; ';
+        foreach ($commandArr as $word) {
+            $containsQuotes = 0;
+            $wordQuoteless = str_replace($commandArr_validQuotes, "", $word, $containsQuotes);
+            if ($commandArr_flag_quote) {
+                $command[count($command)-1] .= " " . $wordQuoteless;
+            } else {
+                echo '<span class="command_part">';
+                array_push($command, $wordQuoteless);
+            }
+            echo $wordQuoteless . " ";
+            if ($containsQuotes) {
+                $commandArr_flag_quote=!$commandArr_flag_quote;
+            }
+            if (!$commandArr_flag_quote) {
+                echo '</span>';
+            }
+        }
+        echo '</p>';
         if (in_array($command[0], array_keys($commandList))) {
             $comm = array_shift($command);
             $argv = $command;
