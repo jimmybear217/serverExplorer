@@ -261,7 +261,7 @@
     }
 
     function command_fs_ls($argv=array(".")) {
-        if (empty($argv)) $argv = array(__DIR__);
+        if (empty($argv)) $argv = array(getcwd());
         $path = realpath($argv[0]);
         if ($path == false) {
             $path = realpath(".");
@@ -270,18 +270,31 @@
         }
         echo '<h3>Contents of <span class="path">' . $path . '</span></h3>';
         if (isFunctionAvailable("scandir")) {
-            echo '<table>';
-            foreach(scandir($path) as $file) {
-                echo '<tr>';
-                $realFile = realpath($path . "/" . $file);
-                if (is_dir($realFile)) {
-                    echo '<td><a href="' . $_SERVER["PHP_SELF"] . '?action=submit&command=fs ls ' . urlencode("'" . $realFile . "'") . '">' . $file . '</a></td>';
-                } else {
-                    echo '<td><a href="' . $_SERVER["PHP_SELF"] . '?action=submit&command=fs open ' . urlencode("'" . $realFile . "'") . '">' . $file . '</a></td>';
+            if (is_readable($path)) {
+                $fstat = array("dev", "ino", "mode", "nlink", "uid", "gid", "rdev", "size", "atime", "mtime", "ctime", "blksize", "blocks");
+                echo '<table>'
+                    . '<tr><th></th><th>Filename</th><th>' . implode('</th><th>', $fstat) . '</th></tr>';
+                foreach(scandir($path) as $file) {
+                    echo '<tr>';
+                    $realFile = realpath($path . "/" . $file);
+                    echo '<td><img src="//" height="24" width="24" alt="' . mime_content_type($path) . '"></td>';
+                    if (is_dir($realFile)) {
+                        echo '<td><a href="' . $_SERVER["PHP_SELF"] . '?action=submit&command=fs ls ' . urlencode("'" . $realFile . "'") . '">' . $file . '</a></td>';
+                    } else {
+                        echo '<td><a href="' . $_SERVER["PHP_SELF"] . '?action=submit&command=fs open ' . urlencode("'" . $realFile . "'") . '">' . $file . '</a></td>';
+                    }
+                    $fstats=stat($path);
+                    foreach ($fstat as $statKey) {
+                        echo "<td>" . json_encode($fstats[$statKey]) . "</td>";
+                    }
+                    echo '</tr>';
                 }
-                echo '</tr>';
+                echo '</table>';
+            } else {
+                echo '<p class="error">This folder is not readable<ul>'
+                    . '<li><a href="' . $_SERVER["PHP_SELF"] . '?action=submit&command=fs ls \'' . realpath($path . "/..") . '\'">Up</a></li>'
+                    . '<li><a href="javascript:history.go(-1);">Back</a></li></ul></p>';
             }
-            echo '</table>';
         } else {
             echo '<p class="error">This function is not available on this server</p>';
         }
