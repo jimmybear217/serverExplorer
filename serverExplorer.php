@@ -69,7 +69,7 @@
                         . '<input type="hidden" name="action" value="submit">'
                         . '<input name="command" type="text" placeholder="$>" value="' . (isset($_GET['command']) ? $_GET['command'] : "") . '"><input type="submit" value="send (or press enter)">'
                         . '</form>',
-        "login"         => '</h3>Please log in</h3><div id="login"><form action="' . $_SERVER["PHP_SELF"] . '?action=login" method="GET">'
+        "login"         => '</h3>Please log in</h3><div id="login"><form action="' . $_SERVER["PHP_SELF"] . '?action=login" method="POST">'
                         . (($settings["auth"]["user_password"]["enabled"]) ? '<input name="username" placeholder="username" type="text" autocomplete="username" value="' . (($settings["auth"]["DemoMode"]["enabled"]) ? $settings["auth"]["DemoMode"]["username"] : "") . '">' : "")
                         . (($settings["auth"]["user_password"]["enabled"] || $settings["auth"]["app_password"]["enabled"]) ? '<input name="password" placeholder="password" type="password" autocomplete="username" value="' . (($settings["auth"]["DemoMode"]["enabled"]) ? $settings["auth"]["DemoMode"]["password"] : "") . '">' : "")
                         . '<input value="login (or press enter)" type="submit">',
