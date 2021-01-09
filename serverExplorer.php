@@ -233,15 +233,15 @@
         global $commandListFS;
         // read first argument
         $comm = array_shift($argv);
-        echo " " . $comm;
+        if (empty($argv)) $argv = array(".");
         if (in_array($comm, array_keys($commandListFS))) {
             if (function_exists("command_fs_" . $comm)) {
                 call_user_func_array("command_fs_" . $comm, array($argv));
             } else {
-                echo "<p>Unable to run this <b>F</b>ile<b>S</b>ystem command</p>";
+                echo '<p class="error">Unable to run this <b>F</b>ile<b>S</b>ystem command</p>';
             }
         } else {
-            echo '<p>Unknown <b>F</b>ile<b>S</b>ystem command</p>';
+            echo '<p class="error">Unknown <b>F</b>ile<b>S</b>ystem command</p>';
             command_fs_help($argv);
         }
     }
@@ -257,12 +257,9 @@
     }
 
     function command_fs_ls($argv=array(".")) {
-        $path = $argv[0];
-        echo " " . $path;
-        $path = realpath($path);
-        echo '<h3>Contents of <b>F</b>ile<b>S</b>ystem</h3>'
-            . '<p class="subtitle">at <span class="path">' . $path . '</span></p>';
-        if (isFunctionAvailable(scandir)) {
+        $path = realpath($argv[0]);
+        echo '<h3>Contents of <span class="path">' . $path . '</span></h3>';
+        if (isFunctionAvailable("scandir")) {
             echo '<table>';
             foreach(scandir($path) as $file) {
                 echo '<tr>';
@@ -288,18 +285,18 @@
     // interpret commands
     if (isset($_GET["action"]) && $_GET["action"] == "submit" && !empty($_GET["command"])) {
         $command = explode(' ', $_GET["command"]);
-        echo "$> " . implode(" ", $command);
+        echo '<p class="command">$&gt; ' . implode(" ", $command) . '</p>';
         if (in_array($command[0], array_keys($commandList))) {
             $comm = array_shift($command);
             $argv = $command;
             if (function_exists("command_" . $comm)) {
                 call_user_func_array("command_" . $comm, array($argv));
             } else {
-                echo "<p>Unable to run this command</p>";
+                echo '<p class="error">Unable to run this command</p>';
             }
         } else {
             // unknown input
-            echo "<p>I'm sorry, this command is not valid.</p>";
+            echo '<p class="error">I\'m sorry, this command is not valid.</p>';
             command_help();
         }
     } else {
