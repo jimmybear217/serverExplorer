@@ -255,7 +255,7 @@
         echo '<h3>Available <b>F</b>ile<b>S</b>ystem commands</h3><table>'
             . '<tr><th>Command</th><th>Description</th>';
         foreach(array_keys($commandListFS) as $command) {
-            echo '<tr><td><a href="' . $_SERVER['PHP_SELF'] . '?action=submit&command=fs%20' . $command . '">' . $command . '</td><td>' . $commandListFS[$command] . '</td></tr>';
+            echo '<tr><td><a href="' . $_SERVER['PHP_SELF'] . '?action=submit&command=fs%20' . $command . '">fs ' . $command . '</td><td>' . $commandListFS[$command] . '</td></tr>';
         }
         echo '</table>';
     }
@@ -277,15 +277,19 @@
                 foreach(scandir($path) as $file) {
                     echo '<tr>';
                     $realFile = realpath($path . "/" . $file);
-                    echo '<td><img src="/auto-mime-icon/mime-icon.php?mime=' . mime_content_type($realFile) . '&filename=' . $file . '" height="24" width="24" alt="' . mime_content_type($realFile) . '" title="' . mime_content_type($realFile) . '"></td>';
-                    if (is_dir($realFile)) {
+                    $fileMime = ((is_readable($realFile)) ? mime_content_type($realFile) : "unreadable");
+                    $file_stats = stat($path);
+                    echo '<td><img src="/auto-mime-icon/mime-icon.php?mime=' . $fileMime . '&filename=' . $file . '" height="24" width="24" alt="' . $fileMime . '" title="' . $fileMime . '"></td>';
+                    if ($fileMime == "unreadable") {
+                        echo '<td>' . $file . '</td>';
+                    } else if (is_dir($realFile)) {
                         echo '<td><a href="' . $_SERVER["PHP_SELF"] . '?action=submit&command=fs ls ' . urlencode("'" . $realFile . "'") . '">' . $file . '</a></td>';
                     } else {
                         echo '<td><a href="' . $_SERVER["PHP_SELF"] . '?action=submit&command=fs open ' . urlencode("'" . $realFile . "'") . '">' . $file . '</a></td>';
                     }
-                    $fstats=stat($path);
+                    $file_stats=stat($path);
                     foreach ($fstat as $statKey) {
-                        echo "<td>" . json_encode($fstats[$statKey]) . "</td>";
+                        echo "<td>" . json_encode($file_stats[$statKey]) . "</td>";
                     }
                     echo '</tr>';
                 }
