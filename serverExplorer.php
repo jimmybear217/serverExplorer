@@ -279,7 +279,7 @@
                     $realFile = realpath($path . "/" . $file);
                     $fileMime = ((is_readable($realFile)) ? mime_content_type($realFile) : "unreadable");
                     $file_stats = stat($path);
-                    echo '<td><img src="/auto-mime-icon/mime-icon.php?mime=' . $fileMime . '&filename=' . $file . '" height="24" width="24" alt="' . $fileMime . '" title="' . $fileMime . '"></td>';
+                    echo '<td><img src="/auto-mime-icon/mime-icon.php?mime=' . urlencode($fileMime) . '&filename=' . urlencode($file) . '" height="24" width="24" alt="' . $fileMime . '" title="' . $fileMime . '"></td>';
                     if ($fileMime == "unreadable") {
                         echo '<td>' . $file . '</td>';
                     } else if (is_dir($realFile)) {
