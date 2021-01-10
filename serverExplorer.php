@@ -277,7 +277,7 @@
                 foreach(scandir($path) as $file) {
                     echo '<tr>';
                     $realFile = realpath($path . "/" . $file);
-                    echo '<td><img src="//" height="24" width="24" alt="' . mime_content_type($path) . '"></td>';
+                    echo '<td><img src="/auto-mime-icon/mime-icon.php?mime=' . mime_content_type($realFile) . '&filename=' . $file . '" height="24" width="24" alt="' . mime_content_type($realFile) . '" title="' . mime_content_type($realFile) . '"></td>';
                     if (is_dir($realFile)) {
                         echo '<td><a href="' . $_SERVER["PHP_SELF"] . '?action=submit&command=fs ls ' . urlencode("'" . $realFile . "'") . '">' . $file . '</a></td>';
                     } else {
