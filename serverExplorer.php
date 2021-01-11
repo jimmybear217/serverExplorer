@@ -12,7 +12,7 @@
         "auth" => array(
             "require_auth" => true,
             "ip_whitelist" => array(
-                "enabled" => true,
+                "enabled" => false,
                 "authorised_ips" => array("127.0.0.1")
             ),
             "user_password" => array(
@@ -236,6 +236,7 @@
         // read first argument
         if (empty($argv)) {
             command_fs_help($argv);
+            command_fs_ls(array("."));
         } else {
             $comm = array_shift($argv);
             if (empty($argv)) $argv = array(".");
