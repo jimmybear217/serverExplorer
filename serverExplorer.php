@@ -306,6 +306,21 @@
         }
     }
 
+    function command_fs_open($argv=array()) {
+        if (empty($argv[0])) {
+            echo '<p class="error">no file was passed as a parameter</p>';
+        } else {
+            $file = realpath($argv[0]);
+            if ($file == false) {
+                echo '<p class="error">the file ' . $file . ' could not be found</p>';
+            } else {
+                echo '<h3>Contents of ' . basename($file) . '</h3>'
+                    . '<iframe style="width: 100%; height: 60vh" class="output-iframe" src="' . $_SERVER["PHP_SELF"] . '?action=fopen&file=' . urlencode($file) . '"></iframe>';
+            }
+        }
+
+    }
+
     // write header
     echo $pages["header"];
     
