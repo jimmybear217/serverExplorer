@@ -64,8 +64,9 @@
         "header"        => '<!DOCTYPE HTML><html><head><title>Server Explorer' . (!empty($_GET["command"]) ? ' $> ' . $_GET["command"] : '') . '</title><link rel="icon" href="'
                         . (($settings["explorer"]["use_remote_assets"]) ? $remote_assets["favicon"]["actual"] : $remote_assets["favicon"]["backup"])
                         . '">' . (($settings["explorer"]["use_remote_assets"]) ? '<link rel="stylesheet" href="' . $remote_assets["stylesheet"] . '">' : '')
-                        . '</head><body><header><h1>' . (($settings["explorer"]["use_remote_assets"]) ? '<img src="' . $remote_assets["logo"] . '" height="32" width="32"> ' : '') . 'Server Explorer</h1></header>'
-                        . '<div id="output">',
+                        . '</head><body><header><h1><a href="' . $_SERVER["PHP_SELF"] . '?action=submit&command=" style="text-decoration: none;color: currentColor;">'
+                        . (($settings["explorer"]["use_remote_assets"]) ? '<img src="' . $remote_assets["logo"] . '" height="32" width="32"> ' : '')
+                        . 'Server Explorer</a></h1></header><div id="output">',
         "input"         => '</div><div id="input"><form action="' . $_SERVER["PHP_SELF"] . '" method="GET">'
                         . '<input type="hidden" name="action" value="submit">'
                         . '<input name="command" type="text" placeholder="$>" value="' . (isset($_GET['command']) ? $_GET['command'] : "") . '"><input type="submit" value="send (or press enter)">'
