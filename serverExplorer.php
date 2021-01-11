@@ -6,7 +6,8 @@
             "enabled" => true,
             "display_errors" => true,
             "use_remote_assets" => true,
-            "assets_server" => "https://jimmybear217.dev/projects/repo/server_explorer/assets"
+            "assets_server" => "https://jimmybear217.dev/projects/repo/server_explorer/serverExplorer/assets",
+            "assets_fileIcons_server" => "https://jimmybear217.dev/projects/repo/auto-mime-icon/www/mime-icon.php"
         ),
         "auth" => array(
             "require_auth" => true,
@@ -261,6 +262,7 @@
     }
 
     function command_fs_ls($argv=array(".")) {
+        global $settings;
         if (empty($argv)) $argv = array(getcwd());
         $path = realpath($argv[0]);
         if ($path == false) {
@@ -279,11 +281,11 @@
                     $realFile = realpath($path . "/" . $file);
                     $fileMime = ((is_readable($realFile)) ? mime_content_type($realFile) : "unreadable");
                     $file_stats = stat($path);
-                    echo '<td><img src="/auto-mime-icon/mime-icon.php?mime=' . urlencode($fileMime) . '&filename=' . urlencode($file) . '" height="24" width="24" alt="' . $fileMime . '" title="' . $fileMime . '"></td>';
+                    echo '<td><img src="' . ($settings["explorer"]["use_remote_assets"] ? $settings["explorer"]["assets_fileIcons_server"] : "//localhost/") . '?mime=' . urlencode($fileMime) . '&filename=' . urlencode($file) . '" height="24" width="24" alt="' . $fileMime . '" title="' . $fileMime . '"></td>';
                     if ($fileMime == "unreadable") {
                         echo '<td>' . $file . '</td>';
                     } else if (is_dir($realFile)) {
-                        echo '<td><a href="' . $_SERVER["PHP_SELF"] . '?action=submit&command=fs ls ' . urlencode("'" . $realFile . "'") . '">' . $file . '</a></td>';
+                        echo '<td><a href="' . $_SERVER["PHP_SELF"] . '?action=submit&command=fs ls ' . urlencode("'" . $realFile . "'") . '">' . $file . '/</a></td>';
                     } else {
                         echo '<td><a href="' . $_SERVER["PHP_SELF"] . '?action=submit&command=fs open ' . urlencode("'" . $realFile . "'") . '">' . $file . '</a></td>';
                     }
