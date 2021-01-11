@@ -7,7 +7,7 @@
             "display_errors" => true,
             "use_remote_assets" => true,
             "assets_server" => "https://jimmybear217.dev/projects/repo/server_explorer/serverExplorer/assets",
-            "assets_fileIcons_server" => "https://jimmybear217.dev/projects/repo/auto-mime-icon/www/mime-icon.php"
+            "assets_fileIcons_server" => "https://jimmybear217.dev/projects/repo/auto_mime_icon/auto-mime-icon/www/mime-icon.php"
         ),
         "auth" => array(
             "require_auth" => true,
