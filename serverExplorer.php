@@ -208,7 +208,7 @@
             . ' in your own setup, your actions may be subject to legal consequences as you would be accessing someone else'
             . '\'s system without their consent. So, any action of yours, is your own responsability. Happy Exploring :)</p>';
         command_help();
-        echo '<p>If you have any questions, problem or suggestion, free to contact me at <a href="mailto:serverExplorer@jimmybear217.dev">serverExplorer@jimmybear217.dev</a>'
+        echo '<p>If you have any questions, problem or suggestion, free to contact me at <a href="mailto:serverExplorer@jimmybear217.dev">serverExplorer@jimmybear217.dev</a> '
             . 'or to raise an issue on <a href="https://github.com/jimmybear217/serverExplorer" target="_blank">GitHub.com/jimmybear217/serverExplorer</a>. Thank you.</p>';
     }
 
