@@ -61,7 +61,7 @@
                         . '<h1>Not Found</h1><p>The requested URL was not found on this server.</p>'
                         . ((!empty($_SERVER["SERVER_SIGNATURE"])) ? '<hr>' . $_SERVER["SERVER_SIGNATURE"] : "" )
                         . '</body></html>',
-        "header"        => '<!DOCTYPE HTML><html><head><title>Server Explorer</title><link rel="icon" href="'
+        "header"        => '<!DOCTYPE HTML><html><head><title>Server Explorer' . (!empty($_GET["command"]) ? ' $> ' . $_GET["command"] : '') . '</title><link rel="icon" href="'
                         . (($settings["explorer"]["use_remote_assets"]) ? $remote_assets["favicon"]["actual"] : $remote_assets["favicon"]["backup"])
                         . '">' . (($settings["explorer"]["use_remote_assets"]) ? '<link rel="stylesheet" href="' . $remote_assets["stylesheet"] . '">' : '')
                         . '</head><body><header><h1>' . (($settings["explorer"]["use_remote_assets"]) ? '<img src="' . $remote_assets["logo"] . '" height="32" width="32"> ' : '') . 'Server Explorer</h1></header>'
@@ -321,12 +321,11 @@
 
     }
 
-    // write header
-    echo $pages["header"];
     
-
+    
     // interpret commands
     if (isset($_GET["action"]) && $_GET["action"] == "submit" && !empty($_GET["command"])) {
+        echo $pages["header"];
         $commandArr = explode(' ', $_GET["command"]);
         $command = array();
         $commandArr_flag_quote = false;
@@ -364,11 +363,47 @@
             echo '<p class="error">I\'m sorry, this command is not valid.</p>';
             command_help();
         }
+        echo $pages["input"] . $pages["footer"];
+
+    } else if (isset($_GET["action"]) && $_GET["action"] == "fopen") {
+        
+        // is file specified?
+        if (empty($_GET["file"])) {
+            header("Content-Type: text/plain", true, 400);
+            die("please specify the file");
+        }
+
+        // does file exist?
+        $file = realpath($_GET["file"]);
+        if ($file == false) {
+            header("Content-Type: text/plain", true, 400);
+            die("error: the specified file could not be found");
+        }
+
+        // is file not a directory
+        if (is_dir($file)) {
+            header("Content-Type: text/plain", true, 400);
+            die("error: this file is a directory");
+        }
+
+        // is readable
+        if (!is_readable($file)) {
+            header("Content-Type: text/plain", true, 400);
+            die("error: this file is not readable");
+        }
+
+        if (!filesize($file)) {
+            header("Content-Type: text/plain", true, 200);
+            die("error: this file has not content");
+        }
+            
+        header("Content-Type: " . mime_content_type($file), true, 200);
+        echo file_get_contents($file);
+            
     } else {
+        echo $pages["header"];
         // show welcome command
         command_welcome();
+        echo $pages["input"] . $pages["footer"];
     }
     
-    
-    // write footer
-    echo $pages["input"] . $pages["footer"];
