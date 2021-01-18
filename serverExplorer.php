@@ -189,6 +189,7 @@
         "phpinfo" => "displays the output of the phpinfo command. very useful to get inteligence on the server",
         "fs" => "interact with the File System. Type `fs help` for a list of commands you can use with fs.",
         "db" => "interact with a MySQL database. Type `db help` for a list of commands you can use with db.",
+        "shell" => "runs shell commands if supported by the system"
     );
     $commandListFS = array(
         'help' => 'show this help message',
