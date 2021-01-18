@@ -201,7 +201,8 @@
     $commandListDB = array(
         'help' => "Shows this help message",
         'init' => "Attempt to connnect to the mysql database",
-        'show' => "Show a list of the tables",
+        'databases' => "Show a list of the tables",
+        'tables' => "Show a list of the tables",
         'select' => "Lists the content of a table",
         'run' => "Run a custom SQL command"
     );
@@ -273,7 +274,7 @@
         echo '<h3>Available <b>F</b>ile<b>S</b>ystem commands</h3><table>'
             . '<tr><th>Command</th><th>Description</th>';
         foreach(array_keys($commandListFS) as $command) {
-            echo '<tr><td><a href="' . $_SERVER['PHP_SELF'] . '?action=submit&command=fs%20' . $command . '">fs ' . $command . '</td><td>' . $commandListFS[$command] . '</td></tr>';
+            echo '<tr><td><a href="' . $_SERVER['PHP_SELF'] . '?action=submit&command=fs%20' . $command . '">fs ' . $command . '</a></td><td>' . $commandListFS[$command] . '</td></tr>';
         }
         echo '</table>';
     }
@@ -397,7 +398,7 @@
                 if (empty($argv[4])) $argv[4] = "&lt;Database&gt;";
             }
         foreach(array_keys($commandListDB) as $command) {
-            echo '<tr><td><a href="' . $_SERVER['PHP_SELF'] . '?action=submit&command=db%20' . $argv[0] . '%20' . $argv[1] . '%20' . $argv[2] . '%20' . $argv[3] . '%20' . $argv[4] . '%20' . $command . '">' . $command . '</td><td>' . $commandListDB[$command] . '</td></tr>';
+            echo '<tr><td><a href="' . $_SERVER['PHP_SELF'] . '?action=submit&command=db%20' . $argv[0] . '%20' . $argv[1] . '%20' . $argv[2] . '%20' . $argv[3] . '%20' . $argv[4] . '%20' . $command . '">' . $command . '</a></td><td>' . $commandListDB[$command] . '</td></tr>';
         }
         echo '</table>';
     }
@@ -424,7 +425,7 @@
         $port = ((count($argv) > 0) ? array_shift($argv) : "3306");
         $database = ((count($argv) > 0) ? array_shift($argv) : "information_schema");
         $comm = ((count($argv) > 0) ? array_shift($argv) : "");
-        echo "<h3>Input</h3><table>"
+        echo "<h3>Settings</h3><table>"
             . "<tr><td>0</td><th>Username</th><td>" . $username . "</td></td>"  // u541886749_test
             . "<tr><td>1</td><th>Password</th><td>" . $password . "</td></td>"  // Test1234$
             . "<tr><td>2</td><th>Server</th><td>" . $server . "</td></td>"      // localhost
@@ -434,12 +435,12 @@
             . "<tr><td>6</td><th>Argv</th><td>" . ((count($argv) > 0) ? $argv : "") . "</td></tr>"
             . "</table>";
         echo "<h3>Tests</h3>";
-        echo "<pre>";
         $dbh = db_connect($username, $password, $database, $server, $port);
         if ($dbh) {
             try {
                 $output = $dbh->query("SHOW DATABASES;");
-                echo "<pre class='output'>" . $output . "</pre>";
+                $count = $output->rowCount();
+                echo '<p><a href="' . $_SERVER['PHP_SELF'] . '?action=submit&command=db%20' . $username . '%20' . $password . '%20' . $server . '%20' . $port . '%20' . $database . '%20databases">' . $count . ' databases available</a></p>';
             } catch (PDOException $e) {
                 echo "<p class='error'>" . $e->getMessage() . "</p>";
             }
@@ -449,6 +450,57 @@
         echo "</pre>";
     }
 
+    function command_db_databases($argv=array()) {
+        $username = ((count($argv) > 0) ? array_shift($argv) : "root");
+        $password = ((count($argv) > 0) ? array_shift($argv) : "toor");
+        $server = ((count($argv) > 0) ? array_shift($argv) : "localhost");
+        $port = ((count($argv) > 0) ? array_shift($argv) : "3306");
+        $database = ((count($argv) > 0) ? array_shift($argv) : "information_schema");
+        $comm = ((count($argv) > 0) ? array_shift($argv) : "");
+        echo "<h3>Available Databases</h3>";
+        $dbh = db_connect($username, $password, $database, $server, $port);
+        if ($dbh) {
+            try {
+                $output = $dbh->query("SHOW DATABASES;");
+                echo "<ul>";
+                while ($row = $output->fetch(PDO::FETCH_ASSOC)) {
+                    echo '<li><a href="' . $_SERVER['PHP_SELF'] . '?action=submit&command=db%20' . $username . '%20' . $password . '%20' . $server . '%20' . $port . '%20' . $row["Database"] . '%20tables">' . $row["Database"] . '</a></li>';
+                }
+                echo "</ul>";
+            } catch (PDOException $e) {
+                echo "<p class='error'>" . $e->getMessage() . "</p>";
+            }
+        } else {
+            echo "<p class='error'>the database handle is empty</p>";
+        }
+    }
+
+    function command_db_tables($argv=array()) {
+        $username = ((count($argv) > 0) ? array_shift($argv) : "root");
+        $password = ((count($argv) > 0) ? array_shift($argv) : "toor");
+        $server = ((count($argv) > 0) ? array_shift($argv) : "localhost");
+        $port = ((count($argv) > 0) ? array_shift($argv) : "3306");
+        $database = ((count($argv) > 0) ? array_shift($argv) : "information_schema");
+        $comm = ((count($argv) > 0) ? array_shift($argv) : "");
+        echo "<h3>Available Tables in $database</h3>";
+        echo "<pre>";
+        $dbh = db_connect($username, $password, $database, $server, $port);
+        if ($dbh) {
+            try {
+                $output = $dbh->query("SHOW TABLES;");
+                echo "<ul>";
+                while ($row = $output->fetch(PDO::FETCH_NUM)) {
+                    echo '<li><a href="' . $_SERVER['PHP_SELF'] . '?action=submit&command=db%20' . $username . '%20' . $password . '%20' . $server . '%20' . $port . '%20' . $database . '%20select%20' . $row[0] . '">' . $row[0] . '</a></li>';
+                }
+                echo "</ul>";
+            } catch (PDOException $e) {
+                echo "<p class='error'>" . $e->getMessage() . "</p>";
+            }
+        } else {
+            echo "<p class='error'>the database handle is empty</p>";
+        }
+        echo "</pre>";
+    }
     
     
     // interpret commands
