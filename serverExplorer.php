@@ -30,7 +30,15 @@
             "DemoMode" => array(
                 "enabled" => true,
                 "username" => "",
-                "password" => "SuperSecurePassword"
+                "password" => "SuperSecurePassword",
+                "database" => array(
+                    "commandEnabled" => true,
+                    "db_username" => "u541886749_test",
+                    "db_password" => "Test1234$",
+                    "db_host" => "localhost",
+                    "db_port" => "3306",
+                    "db_database" => "u541886749_test"
+                )
             )
         )
     );
@@ -190,6 +198,13 @@
         'touch' => 'creates an empty file where specified',
         'download' => 'download the specified address to the disk at the specified location'*/
     );
+    $commandListDB = array(
+        'help' => "Shows this help message",
+        'init' => "Attempt to connnect to the mysql database",
+        'show' => "Show a list of the tables",
+        'select' => "Lists the content of a table",
+        'run' => "Run a custom SQL command"
+    );
 
     function isFunctionAvailable($func) {
         if (ini_get('safe_mode')) return false;
@@ -320,7 +335,118 @@
                     . '<iframe style="width: 100%; height: 60vh" class="output-iframe" src="' . $_SERVER["PHP_SELF"] . '?action=fopen&file=' . urlencode($file) . '"></iframe>';
             }
         }
+    }
 
+    function command_db($argv=array()) {
+        // set fs command list
+        global $commandListDB;
+        global $settings;
+        // read demo settings
+        if ($settings["auth"]["DemoMode"]["enabled"]) {
+            if ($settings["auth"]["DemoMode"]["database"]["commandEnabled"]) {
+                if (empty($argv[0]) && !empty($settings["auth"]["DemoMode"]["database"]["db_username"]))
+                    $argv[0] = $settings["auth"]["DemoMode"]["database"]["db_username"];
+                if (empty($argv[1]) && !empty($settings["auth"]["DemoMode"]["database"]["db_password"]))
+                    $argv[1] = $settings["auth"]["DemoMode"]["database"]["db_password"];
+                if (empty($argv[2]) && !empty($settings["auth"]["DemoMode"]["database"]["db_host"]))
+                    $argv[2] = $settings["auth"]["DemoMode"]["database"]["db_host"];
+                if (empty($argv[3]) && !empty($settings["auth"]["DemoMode"]["database"]["db_port"]))
+                    $argv[3] = $settings["auth"]["DemoMode"]["database"]["db_port"];
+                if (empty($argv[4]) && !empty($settings["auth"]["DemoMode"]["database"]["db_database"]))
+                    $argv[4] = $settings["auth"]["DemoMode"]["database"]["db_database"];
+            } else {
+                echo "<p class='error'>This command is disabled in demo mode</p>";
+                return false;
+            }
+        }
+        // read command argument
+        if (empty($argv)) {
+            command_db_help($argv);
+        } else {
+            $comm = (isset($argv[5]) ? $argv[5] : "");
+            if (empty($argv)) $argv = array();
+            if (in_array($comm, array_keys($commandListDB))) {
+                if (function_exists("command_db_" . $comm)) {
+                    call_user_func_array("command_db_" . $comm, array($argv));
+                } else {
+                    echo '<p class="error">Unable to run this <b>F</b>ile<b>S</b>ystem command</p>';
+                }
+            } else {
+                command_db_help($argv);
+            }
+        }
+    }
+
+    function command_db_help($argv=array()) {
+        global $commandListDB;
+        global $settings;
+        echo '<h3>Available <b>D</b>ata<b>B</b>ase commands</h3>'
+            . '<p>db &lt;Username&gt; &lt;Password&gt; &lt;Server&gt; &lt;Port&gt; &lt;Database&gt; &lt;Command&gt; [Arguments]</p><table>'
+            . '<tr><th>Command</th><th>Description</th>';
+            if ($settings["auth"]["DemoMode"]["enabled"]) {
+                if (empty($argv[0]) && !empty($settings["auth"]["DemoMode"]["database"]["db_username"]))    $argv[0] = $settings["auth"]["DemoMode"]["database"]["db_username"];
+                if (empty($argv[1]) && !empty($settings["auth"]["DemoMode"]["database"]["db_password"]))    $argv[1] = $settings["auth"]["DemoMode"]["database"]["db_password"];
+                if (empty($argv[2]) && !empty($settings["auth"]["DemoMode"]["database"]["db_host"]))        $argv[2] = $settings["auth"]["DemoMode"]["database"]["db_host"];
+                if (empty($argv[3]) && !empty($settings["auth"]["DemoMode"]["database"]["db_port"]))        $argv[3] = $settings["auth"]["DemoMode"]["database"]["db_port"];
+                if (empty($argv[4]) && !empty($settings["auth"]["DemoMode"]["database"]["db_database"]))    $argv[4] = $settings["auth"]["DemoMode"]["database"]["db_database"];
+            } else {
+                if (empty($argv[0])) $argv[0] = "&lt;Username&gt;";
+                if (empty($argv[1])) $argv[1] = "&lt;Password&gt;";
+                if (empty($argv[2])) $argv[2] = "&lt;Server&gt;";
+                if (empty($argv[3])) $argv[3] = "&lt;Port&gt;";
+                if (empty($argv[4])) $argv[4] = "&lt;Database&gt;";
+            }
+        foreach(array_keys($commandListDB) as $command) {
+            echo '<tr><td><a href="' . $_SERVER['PHP_SELF'] . '?action=submit&command=db%20' . $argv[0] . '%20' . $argv[1] . '%20' . $argv[2] . '%20' . $argv[3] . '%20' . $argv[4] . '%20' . $command . '">' . $command . '</td><td>' . $commandListDB[$command] . '</td></tr>';
+        }
+        echo '</table>';
+    }
+
+    function db_connect($username="", $password="", $database="", $server="", $port="") {
+        if (empty($username)) $username = "root";
+        if (empty($password)) $password = "toor";
+        if (empty($server)) $server = "localhost";
+        if (empty($port)) $port = "3306";
+        if (empty($database)) $database = "information_schema";
+        try {
+            $dbh = new PDO("mysql:dbname=$database;port=$port;host=$server", $username, $password);
+        } catch (PDOException $e) {
+            echo "<p class='error'>PDO Connection Error: " . $e->getMessage() . "</p>";
+            return false;
+        }
+        return $dbh;
+    }
+
+    function command_db_init($argv=array()) {
+        $username = ((count($argv) > 0) ? array_shift($argv) : "root");
+        $password = ((count($argv) > 0) ? array_shift($argv) : "toor");
+        $server = ((count($argv) > 0) ? array_shift($argv) : "localhost");
+        $port = ((count($argv) > 0) ? array_shift($argv) : "3306");
+        $database = ((count($argv) > 0) ? array_shift($argv) : "information_schema");
+        $comm = ((count($argv) > 0) ? array_shift($argv) : "");
+        echo "<h3>Input</h3><table>"
+            . "<tr><td>0</td><th>Username</th><td>" . $username . "</td></td>"  // u541886749_test
+            . "<tr><td>1</td><th>Password</th><td>" . $password . "</td></td>"  // Test1234$
+            . "<tr><td>2</td><th>Server</th><td>" . $server . "</td></td>"      // localhost
+            . "<tr><td>3</td><th>Port</th><td>" . $port . "</td></td>"          // 3306
+            . "<tr><td>4</td><th>Database</th><td>" . $database . "</td></td>"  // u541886749_test
+            . "<tr><td>5</td><th>Comm</th><td>" . $comm . "</td></td>"
+            . "<tr><td>6</td><th>Argv</th><td>" . ((count($argv) > 0) ? $argv : "") . "</td></tr>"
+            . "</table>";
+        echo "<h3>Tests</h3>";
+        echo "<pre>";
+        $dbh = db_connect($username, $password, $database, $server, $port);
+        if ($dbh) {
+            try {
+                $output = $dbh->query("SHOW DATABASES;");
+                echo "<pre class='output'>" . $output . "</pre>";
+            } catch (PDOException $e) {
+                echo "<p class='error'>" . $e->getMessage() . "</p>";
+            }
+        } else {
+            echo "<p class='error'>the database handle is empty</p>";
+        }
+        echo "</pre>";
     }
 
     
