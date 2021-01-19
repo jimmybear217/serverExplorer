@@ -547,6 +547,47 @@
         }
     }
 
+    function command_db_run($argv=array()) {
+        $username = ((count($argv) > 0) ? array_shift($argv) : "root");
+        $password = ((count($argv) > 0) ? array_shift($argv) : "toor");
+        $server = ((count($argv) > 0) ? array_shift($argv) : "localhost");
+        $port = ((count($argv) > 0) ? array_shift($argv) : "3306");
+        $database = ((count($argv) > 0) ? array_shift($argv) : "information_schema");
+        $comm = ((count($argv) > 0) ? array_shift($argv) : "");
+        $query = implode(" ", $argv);
+        echo "<h3>Result of \"$query\" on $database</h3>";
+        $dbh = db_connect($username, $password, $database, $server, $port);
+        if ($dbh) {
+            try {
+                $output = $dbh->query($query);
+                if ($output == false) {
+                    echo "<p class='error'>Empty result</p>";
+                } else {
+                    echo "<table>";
+                    $firstLine = true;
+                    while ($row = $output->fetch(PDO::FETCH_ASSOC)) {
+                        if ($firstLine) {
+                            foreach(array_keys($row) as $header) {
+                                echo "<th>$header</th>";
+                            }
+                            $firstLine = false;
+                        }
+                        echo "<tr>";
+                        foreach($row as $cell) {
+                            echo "<td>$cell</td>";
+                        }
+                        echo "</tr>";
+                    }
+                    echo "</table>";
+                }
+            } catch (PDOException $e) {
+                echo "<p class='error'>" . $e->getMessage() . "</p>";
+            }
+        } else {
+            echo "<p class='error'>the database handle is empty</p>";
+        }
+    }
+
     function command_shell($argv=array()) {
         if (isFunctionAvailable("shell_exec")) {
             $bash = implode(" ", $argv);
