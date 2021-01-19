@@ -194,12 +194,7 @@
     $commandListFS = array(
         'help' => 'show this help message',
         'ls' => 'lists the content of the specifed directory. defaults to the current directory.',
-        'open' => 'opens the specified file',
-        /*
-        'rm' => 'deletes the specified file if possible',
-        'touch' => 'creates an empty file where specified',
-        'download' => 'download the specified address to the disk at the specified location'
-        */
+        'open' => 'opens the specified file'
     );
     $commandListDB = array(
         'help' => "Shows this help message",
@@ -208,12 +203,6 @@
         'tables' => "Show a list of the tables",
         'select' => "Lists the content of a table",
         'run' => "Run a custom SQL command"
-        /*
-        'update' => 'run update command',
-        'delete' => 'run delete command',
-        'drop' => 'run drop command (removes a database)',
-        'insert' => 'run insert command'
-        */
     );
 
     function isFunctionAvailable($func) {
